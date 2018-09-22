@@ -7,8 +7,9 @@
     public class HttpResponse
     {
         public HttpStatusCode HttpStatusCode { get; }
-        public Error Error { get; internal set; }
         public HttpResponseHeaders Headers { get; }
+
+        public Error Error { get; internal set; }
 
         public HttpResponse(HttpResponseMessage message)
         {

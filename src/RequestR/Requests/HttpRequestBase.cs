@@ -146,7 +146,7 @@
             return Task.CompletedTask;
         }
 
-        protected abstract Task<TResponse> ParseResponseAsync(HttpResponseMessage message, CancellationToken cancellationToken);
+        protected abstract Task<TResponse> ParseResponseAsync(HttpResponseMessage message, Error error, CancellationToken cancellationToken);
 
         protected virtual bool TryParseErrorBody(string content, out ErrorBody error)
         {
@@ -162,7 +162,7 @@
             };
         }
 
-        protected async Task<Error> GetErrorAsync(HttpResponseMessage message)
+        protected virtual async Task<Error> GetErrorAsync(HttpResponseMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -192,15 +192,19 @@
 
         internal async Task<TResponse> GetResponseAsync(HttpResponseMessage message, CancellationToken cancellationToken)
         {
-            var response = await ParseResponseAsync(message, cancellationToken).ConfigureAwait(false);
+            // Check if the response is an error
             var error = await GetErrorAsync(message).ConfigureAwait(false);
 
+            // if we have an error, handle it
             if (error != null)
-            {
                 HandleError(error);
 
+            // if the error wasn't handled, parse the response
+            var response = await ParseResponseAsync(message, error, cancellationToken).ConfigureAwait(false);
+
+            // add our error if we had one
+            if (error != null)
                 response.Error = error;
-            }
 
             return response;
         }

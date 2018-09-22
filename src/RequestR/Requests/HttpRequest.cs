@@ -11,7 +11,7 @@
         {
         }
 
-        protected override Task<HttpResponse> ParseResponseAsync(HttpResponseMessage message, CancellationToken cancellationToken)
+        protected override Task<HttpResponse> ParseResponseAsync(HttpResponseMessage message, Error error, CancellationToken cancellationToken)
         {
             return Task.FromResult(new HttpResponse(message));
         }
@@ -23,9 +23,9 @@
         {
         }
 
-        protected override async Task<HttpResponse<T>> ParseResponseAsync(HttpResponseMessage message, CancellationToken cancellationToken)
+        protected override async Task<HttpResponse<T>> ParseResponseAsync(HttpResponseMessage message, Error error, CancellationToken cancellationToken)
         {
-            if (!message.IsSuccessStatusCode)
+            if (error != null)
                 return new HttpResponse<T>(message, default);
 
             var contentString = await message.Content.ReadAsStringAsync().ConfigureAwait(false);
